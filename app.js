@@ -17,8 +17,14 @@ const clientPool = new Pool({
     port: process.env.DB_PORT,
 });
 
+let clientPoolRes = {};
+
 app.use(bodyParser.json());
 app.use(cors());
+
+app.get('/translation-host/check', (req, res) => {
+    res.send(clientPoolRes);
+})
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
@@ -30,15 +36,20 @@ app.listen(port, () => {
     });
 });
 
-const startFunction = async (req, res) => {
+async function startFunction() {
     try {
-        const result = await clientPool.query('SELECT * FROM clients WHERE dbSync = active');
-        res.json(result.rows);
+        const pgClient = await clientPool.connect();
+        const result = await pgClient.query('SELECT * FROM clients WHERE dbsync = "active"');
+        clientPoolRes = result.rows;
+        pgClient.release();
+        //clientPoolRes = result.rows;
     } catch (error) {
         console.error('Error executing query', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }
+
+
 
 
 /*const dataPool = new Pool({
