@@ -18,6 +18,7 @@ const clientPool = new Pool({
 });
 
 let clientPoolRes = {};
+let dataPoolRes = {};
 let runs = 0;
 let dbType = ""
 
@@ -48,7 +49,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 app.get('/translation-host/check', (req, res) => {
-    res.send(`DB Type translating: ${dbType}. This is run #${runs}`);
+    res.send(dataPoolRes);
 })
 
 app.listen(port, () => {
@@ -82,13 +83,13 @@ async function handleMSSQL(obj) {
         await mssql.connect(mssqlConfig);
     
         // Query to retrieve all data from the specified table
-        const queryResult = await mssql.query`SELECT * FROM ${tableName}`;
+        const queryResult = await mssql.query`SELECT * FROM ${obj.raw_table_name}`;
     
         // Disconnect from the MSSQL database
         await mssql.close();
     
         // Return the result as JSON
-        return queryResult.recordset;
+        dataPoolRes = queryResult.recordset;
     } catch (error) {
         console.error('Error:', error.message);
         throw error;
