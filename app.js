@@ -21,6 +21,7 @@ let clientPoolRes = {};
 let dataPoolRes = {};
 let runs = 0;
 let dbType = ""
+let sourceConfigObject ={}
 
 function syncMatrix() {
     runs++;
@@ -71,16 +72,22 @@ async function startFunction() {
 
 async function handleMSSQL(obj) {
     dbType = obj.db_type;
-    const mssqlConfig = {
+    sourceConfigObject = {
         user: obj.raw_user,
         password: obj.raw_pass,
         server: obj.raw_server,
         database: obj.raw_table,
+        options: {
+            encrypt: true, // Enable encryption (if required)
+            trustServerCertificate: true,
+        },
     };
 
-    try {
+    dataPoolRes = obj.raw_table_name
+
+    /*try {
         // Connect to the MSSQL database
-        await mssql.connect(mssqlConfig);
+        await mssql.connect(sourceConfigObject);
     
         // Query to retrieve all data from the specified table
         const queryResult = await mssql.query`SELECT * FROM ${obj.raw_table_name}`;
@@ -89,11 +96,12 @@ async function handleMSSQL(obj) {
         await mssql.close();
     
         // Return the result as JSON
-        dataPoolRes = queryResult.recordset;
+        //dataPoolRes = queryResult.recordset;
     } catch (error) {
+        dataPoolRes = error.message
         console.error('Error:', error.message);
         throw error;
-    }
+    }*/
 }
 
 async function handleMySQL(obj) {
